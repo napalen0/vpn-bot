@@ -417,7 +417,10 @@ async def cb_profile_lang(call: CallbackQuery, state: FSMContext):
     await call.answer()
     fsm = await state.get_data()
     current = fsm.get("lang", "ru")
-    await render(call, state, t("lang.choose"), language_selector_kb(current, source="profile"))@router.callback_query(F.data == "profile_config")
+    await render(call, state, t("lang.choose"), language_selector_kb(current, source="profile"))
+
+
+@router.callback_query(F.data == "profile_config")
 async def cb_profile_config(call: CallbackQuery, state: FSMContext, client: BackendClient):
     await call.answer()
     tg = call.from_user.id
