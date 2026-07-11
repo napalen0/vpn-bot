@@ -161,6 +161,17 @@ def _migrate_sqlite_servers_grpc(sync_conn) -> None:
         sync_conn.execute(text("ALTER TABLE servers ADD COLUMN grpc_port INTEGER"))
 
 
+def _migrate_sqlite_users_language(sync_conn) -> None:
+    from sqlalchemy import text
+
+    if sync_conn.engine.dialect.name != "sqlite":
+        return
+    rows = sync_conn.execute(text("PRAGMA table_info(users)")).fetchall()
+    cols = {row[1] for row in rows}
+    if "language" not in cols:
+        sync_conn.execute(text("ALTER TABLE users ADD COLUMN language VARCHAR(8) DEFAULT 'ru'"))
+
+
 async def init_db() -> None:
     from app import models  # noqa: F401
 
@@ -171,3 +182,4 @@ async def init_db() -> None:
         await conn.run_sync(_migrate_sqlite_users_push_notify)
         await conn.run_sync(_migrate_sqlite_users_sub_token)
         await conn.run_sync(_migrate_sqlite_servers_grpc)
+        await conn.run_sync(_migrate_sqlite_users_language)
