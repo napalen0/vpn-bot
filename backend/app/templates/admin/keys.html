@@ -1,0 +1,32 @@
+{% extends "admin/base.html" %}
+{% block title %}VPN Keys{% endblock %}
+{% block body %}
+<h1>🔑 VPN Keys</h1>
+<p class="muted" style="font-size:.85rem;margin-bottom:1rem">UUIDs are pushed to Xray automatically when keys are issued or extended (SSH password stored in DB per server, or key via <code>.env</code>).</p>
+<table>
+  <thead>
+    <tr><th>ID</th><th>User TG</th><th>UUID</th><th>Server</th><th>Traffic limit</th><th>Until</th><th>Status</th><th>Actions</th></tr>
+  </thead>
+  <tbody>
+  {% for k in keys %}
+    <tr>
+      <td>{{ k.id }}</td>
+      <td>{{ k.user.telegram_id if k.user else "—" }}</td>
+      <td style="word-break:break-all;font-size:.75rem">{{ k.uuid }}</td>
+      <td>{{ k.server.name if k.server else "—" }}</td>
+      <td>{{ (k.traffic_limit_bytes / 1073741824)|round(1) }} GB</td>
+      <td>{{ k.expires_at or "—" }}</td>
+      <td><span class="pill">{{ k.status }}</span></td>
+      <td>
+        <form class="inline" method="post" action="/admin/keys/{{ k.id }}/extend"><input type="number" name="days" value="30" style="width:4rem"/><button class="btn ghost" type="submit">Extend</button></form>
+        <form class="inline" method="post" action="/admin/keys/{{ k.id }}/delete"><button class="btn danger" type="submit">Revoke</button></form>
+        <form class="inline" method="post" action="/admin/keys/{{ k.id }}/server">
+          <select name="server_id">{% for s in servers %}<option value="{{ s.id }}" {% if k.server_id == s.id %}selected{% endif %}>{{ s.id }} — {{ s.name }}</option>{% endfor %}</select>
+          <button class="btn ghost" type="submit">Server</button>
+        </form>
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

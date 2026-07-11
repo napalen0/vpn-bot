@@ -1,0 +1,29 @@
+{% extends "admin/base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block body %}
+<h1>📊 Dashboard</h1>
+<div class="grid">
+  <div class="stat"><span class="muted">Total users</span><b>{{ total_users }}</b></div>
+  <div class="stat"><span class="muted">Active subscriptions</span><b>{{ active_subs }}</b></div>
+  <div class="stat"><span class="muted">New today</span><b>{{ new_today }}</b></div>
+  <div class="stat"><span class="muted">Revenue today (USDT)</span><b>{{ revenue_today }}</b></div>
+  <div class="stat"><span class="muted">Revenue this month (USDT)</span><b>{{ revenue_month }}</b></div>
+</div>
+<h1 style="margin-top:2rem">🌐 Servers</h1>
+<table>
+  <thead><tr><th>Name</th><th>Country</th><th>Host</th><th>Status</th><th>Latency</th></tr></thead>
+  <tbody>
+  {% for s in servers %}
+    <tr>
+      <td>{{ s.name }}</td>
+      <td>{{ s.country }}</td>
+      <td>{{ s.host }}:{{ s.port }}</td>
+      <td>{% if s.last_online %}<span class="pill ok">online</span>{% elif s.last_online == false %}<span class="pill bad">offline</span>{% else %}<span class="pill">—</span>{% endif %}</td>
+      <td>{% if s.last_latency_ms is not none %}{{ "%.0f"|format(s.last_latency_ms) }} ms{% else %}—{% endif %}</td>
+    </tr>
+  {% else %}
+    <tr><td colspan="5" class="muted">No servers — add one in the Servers section.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

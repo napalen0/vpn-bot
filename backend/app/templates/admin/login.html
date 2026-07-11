@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Login — VPN Admin</title>
+  <style>
+    body { margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center;
+      font-family: system-ui, sans-serif; background:#0f1419; color:#e7ecf3; }
+    form { background:#1a2332; padding:2rem; border-radius:12px; width:100%; max-width:360px; border:1px solid #2a3545; }
+    label { display:block; margin-top:1rem; font-size:.85rem; color:#8b9bb4; }
+    input { width:100%; margin-top:.35rem; padding:.6rem; border-radius:8px; border:1px solid #2a3545; background:#131c28; color:#e7ecf3; }
+    button { margin-top:1.25rem; width:100%; padding:.65rem; border:none; border-radius:8px; background:#3d8bfd; color:#fff; font-weight:600; cursor:pointer; }
+    .err { color:#f5a4a4; font-size:.85rem; margin-top:.75rem; }
+  </style>
+</head>
+<body>
+<form method="post" action="/admin/login">
+  <h2 style="margin:0">Admin Panel</h2>
+  {% if error %}<div class="err">{{ error }}</div>{% endif %}
+  <label>Username<input name="username" autocomplete="username" required/></label>
+  <label>Password<input type="password" name="password" autocomplete="current-password" required/></label>
+  <button type="submit">Sign In</button>
+</form>
+</body>
+</html>

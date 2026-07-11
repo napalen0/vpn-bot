@@ -1,0 +1,29 @@
+{% extends "admin/base.html" %}
+{% block title %}Payments{% endblock %}
+{% block body %}
+<h1>💳 Payments</h1>
+<form method="post" action="/admin/payments/sync" style="margin-bottom:1rem"><button class="btn" type="submit">Sync from CryptoBot (getInvoices)</button></form>
+<table>
+  <thead>
+    <tr><th>ID</th><th>Invoice</th><th>User TG</th><th>Amount</th><th>Status</th><th>Plan (days)</th><th>Date</th><th></th></tr>
+  </thead>
+  <tbody>
+  {% for p in payments %}
+    <tr>
+      <td>{{ p.id }}</td>
+      <td>{{ p.cryptobot_invoice_id or "—" }}</td>
+      <td>{{ p.user.telegram_id if p.user else "—" }}</td>
+      <td>{{ p.amount }} {{ p.currency }}</td>
+      <td><span class="pill {% if p.status == 'paid' %}ok{% endif %}">{{ p.status }}</span></td>
+      <td>{{ p.plan_days }}</td>
+      <td>{{ p.paid_at or p.created_at }}</td>
+      <td>
+        {% if p.status != 'paid' %}
+        <form class="inline" method="post" action="/admin/payments/{{ p.id }}/confirm"><button class="btn" type="submit">Confirm</button></form>
+        {% endif %}
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

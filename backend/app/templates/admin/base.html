@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>{% block title %}VPN Admin{% endblock %}</title>
+  <style>
+    :root { --bg:#0f1419; --card:#1a2332; --text:#e7ecf3; --muted:#8b9bb4; --accent:#3d8bfd; --ok:#2ecc71; --bad:#e74c3c; }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family: ui-sans-serif, system-ui, sans-serif; background:var(--bg); color:var(--text); line-height:1.5; }
+    a { color:var(--accent); text-decoration:none; }
+    a:hover { text-decoration:underline; }
+    .wrap { max-width:1200px; margin:0 auto; padding:1rem 1.25rem 3rem; }
+    nav { display:flex; flex-wrap:wrap; gap:.5rem .75rem; padding:.75rem 0; border-bottom:1px solid #2a3545; margin-bottom:1.5rem; align-items:center; }
+    nav a { padding:.35rem .6rem; border-radius:6px; background:var(--card); font-size:.9rem; }
+    nav a:hover { background:#243044; text-decoration:none; }
+    h1 { font-size:1.35rem; font-weight:600; margin:0 0 1rem; }
+    .grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(200px,1fr)); gap:.75rem; margin-bottom:1.5rem; }
+    .stat { background:var(--card); padding:1rem; border-radius:10px; border:1px solid #2a3545; }
+    .stat b { display:block; font-size:1.4rem; margin-top:.25rem; }
+    .muted { color:var(--muted); font-size:.85rem; }
+    table { width:100%; border-collapse:collapse; font-size:.88rem; background:var(--card); border-radius:10px; overflow:hidden; border:1px solid #2a3545; }
+    th, td { padding:.55rem .65rem; text-align:left; border-bottom:1px solid #2a3545; vertical-align:top; }
+    th { background:#131c28; color:var(--muted); font-weight:600; }
+    tr:last-child td { border-bottom:none; }
+    .btn { display:inline-block; padding:.35rem .65rem; border-radius:6px; border:none; background:var(--accent); color:#fff; cursor:pointer; font-size:.8rem; }
+    .btn.danger { background:var(--bad); }
+    .btn.ghost { background:#243044; color:var(--text); }
+    form.inline { display:inline; }
+    input, select { padding:.4rem .5rem; border-radius:6px; border:1px solid #2a3545; background:#131c28; color:var(--text); font-size:.85rem; }
+    .pill { display:inline-block; padding:.15rem .45rem; border-radius:999px; font-size:.75rem; background:#243044; }
+    .pill.ok { background:#1a3d2a; color:#6ee7a8; }
+    .pill.bad { background:#3d1a1a; color:#f5a4a4; }
+  </style>
+  {% block head %}{% endblock %}
+</head>
+<body>
+<div class="wrap">
+  <nav>
+    <a href="/admin/dashboard">📊 Dashboard</a>
+    <a href="/admin/users">👤 Users</a>
+    <a href="/admin/keys">🔑 VPN Keys</a>
+    <a href="/admin/payments">💳 Payments</a>
+    <a href="/admin/referrals">👥 Referrals</a>
+    <a href="/admin/servers">🌐 Servers</a>
+    <a href="/admin/settings">⚙️ Settings</a>
+    <span style="flex:1"></span>
+    <a href="/admin/logout" class="muted">Logout</a>
+  </nav>
+  {% block body %}{% endblock %}
+</div>
+</body>
+</html>

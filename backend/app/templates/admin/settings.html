@@ -1,0 +1,20 @@
+{% extends "admin/base.html" %}
+{% block title %}Settings{% endblock %}
+{% block body %}
+<h1>⚙️ Settings</h1>
+<form method="post" action="/admin/settings" style="display:grid;gap:.6rem;max-width:420px">
+  <label class="muted">Trial (days)<input name="trial_days" value="{{ s.trial_days }}" required/>
+    <span class="muted" style="display:block;font-size:.75rem;margin-top:.2rem">In practice trial is always 1 day; this field is kept for compatibility.</span>
+  </label>
+  <label class="muted">Referral bonus (days)<input name="referral_bonus_days" value="{{ s.referral_bonus_days }}" required/></label>
+  <label class="muted">Min plan for bonus (days)<input name="referral_min_plan_days" value="{{ s.referral_min_plan_days }}" required/></label>
+  <label class="muted">Trial traffic (GB)<input name="traffic_limit_trial_gb" value="{{ s.traffic_limit_trial_gb }}" required/></label>
+  <label class="muted">Paid traffic (GB)<input name="traffic_limit_paid_gb" value="{{ s.traffic_limit_paid_gb }}" required/></label>
+  <label class="muted">Slots per server (max active users)<input name="pool_slots_per_server" value="{{ s.pool_slots_per_server }}" required min="1"/></label>
+  <label class="muted">Price 7 days USDT<input name="price_7_usdt" value="{{ s.price_7_usdt }}" required/></label>
+  <label class="muted">Price 30 days USDT<input name="price_30_usdt" value="{{ s.price_30_usdt }}" required/></label>
+  <label class="muted">Price 90 days USDT<input name="price_90_usdt" value="{{ s.price_90_usdt }}" required/></label>
+  <label class="muted">Bot username (without @)<input name="bot_username" value="{{ s.bot_username }}" placeholder="your_bot"/></label>
+  <button class="btn" type="submit">Save</button>
+</form>
+{% endblock %}

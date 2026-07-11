@@ -1,0 +1,33 @@
+{% extends "admin/base.html" %}
+{% block title %}Users{% endblock %}
+{% block body %}
+<h1>👤 Users</h1>
+<table>
+  <thead>
+    <tr>
+      <th>ID</th><th>TG</th><th>Username</th><th>Status</th><th>Until</th><th>Referrer</th><th>Referred</th><th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+  {% for u in users %}
+    <tr>
+      <td>{{ u.id }}</td>
+      <td>{{ u.telegram_id }}</td>
+      <td>@{{ u.username or "—" }}</td>
+      <td><span class="pill">{{ u.status }}</span></td>
+      <td>{% if u.subscription_end %}{{ u.subscription_end }}{% else %}—{% endif %}</td>
+      <td>{% if u.referrer %}{{ u.referrer.telegram_id }}{% else %}—{% endif %}</td>
+      <td>{{ invited_counts.get(u.id, 0) }}</td>
+      <td>
+        <form class="inline" method="post" action="/admin/users/{{ u.id }}/extend"><input type="number" name="days" value="30" style="width:4rem"/><button class="btn ghost" type="submit">+days</button></form>
+        <form class="inline" method="post" action="/admin/users/{{ u.id }}/block"><button class="btn danger" type="submit">Block</button></form>
+        <form class="inline" method="post" action="/admin/users/{{ u.id }}/unblock"><button class="btn ghost" type="submit">Unblock</button></form>
+        <form class="inline" method="post" action="/admin/users/{{ u.id }}/trial"><button class="btn ghost" type="submit">Trial</button></form>
+        <form class="inline" method="post" action="/admin/users/{{ u.id }}/manual_key"><input type="number" name="days" value="30" style="width:4rem"/><button class="btn" type="submit">Key</button></form>
+        <form class="inline" method="post" action="/admin/users/{{ u.id }}/delete" onsubmit="return confirm('Delete user?');"><button class="btn danger" type="submit">Delete</button></form>
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

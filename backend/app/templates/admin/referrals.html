@@ -1,0 +1,36 @@
+{% extends "admin/base.html" %}
+{% block title %}Referrals{% endblock %}
+{% block body %}
+<h1>👥 Referrals</h1>
+<h2 class="muted" style="font-size:1rem">Top referrers</h2>
+<table style="margin-bottom:2rem">
+  <thead><tr><th>Referrer user_id</th><th>Invites</th></tr></thead>
+  <tbody>
+  {% for row in top %}
+    <tr><td>{{ row[0] }}</td><td>{{ row[1] }}</td></tr>
+  {% else %}
+    <tr><td colspan="2" class="muted">No data</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+<form method="post" action="/admin/referrals/bonus" style="margin-bottom:1.5rem;display:flex;flex-wrap:wrap;gap:.5rem;align-items:center">
+  <span class="muted">Manual bonus:</span>
+  <input type="number" name="referrer_user_id" placeholder="user id" required style="width:8rem"/>
+  <input type="number" name="days" value="3" style="width:4rem"/>
+  <button class="btn" type="submit">Grant days</button>
+</form>
+<table>
+  <thead><tr><th>ID</th><th>Referrer</th><th>Referred</th><th>Paid</th><th>Bonus days</th></tr></thead>
+  <tbody>
+  {% for r in referrals %}
+    <tr>
+      <td>{{ r.id }}</td>
+      <td>{{ r.referrer_user_id }}</td>
+      <td>{{ r.referred_user_id }}</td>
+      <td>{{ "yes" if r.referred_paid else "no" }}</td>
+      <td>{{ r.bonus_days_granted }}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
