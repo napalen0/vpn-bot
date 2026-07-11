@@ -10,17 +10,13 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import Payment, PaymentStatus, User, UserStatus
-from app.services.notifier import BUY_INLINE_KEYBOARD, notify_user_telegram
+from app.services.notifier import buy_inline_keyboard, notify_user_telegram
 from app.services.vpn_core import _as_utc, _now, refresh_user_status
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
-from bot.locale import t  # noqa: E402
+from bot.locale import set_lang, t  # noqa: E402
 
 log = logging.getLogger(__name__)
-
-MSG_TRIAL_ENDED = t("notify.trial_ended")
-MSG_SUB_EXPIRED = t("notify.sub_expired")
-MSG_SUB_3D = t("notify.sub_3d_warning")
 
 
 async def _user_has_paid_payment(session: AsyncSession, user_id: int) -> bool:
@@ -79,7 +75,8 @@ async def run_subscription_notifications(session: AsyncSession) -> None:
     for u in trial_rows:
         if await _user_has_paid_payment(session, u.id):
             continue
-        ok = await notify_user_telegram(u.telegram_id, MSG_TRIAL_ENDED, reply_markup=BUY_INLINE_KEYBOARD)
+        set_lang(u.language)
+        ok = await notify_user_telegram(u.telegram_id, t("notify.trial_ended"), reply_markup=buy_inline_keyboard())
         if ok:
             u.notify_trial_ended_sent = True
             await session.commit()
@@ -96,7 +93,8 @@ async def run_subscription_notifications(session: AsyncSession) -> None:
     for u in paid_exp:
         if not await _user_has_paid_payment(session, u.id):
             continue
-        ok = await notify_user_telegram(u.telegram_id, MSG_SUB_EXPIRED, reply_markup=BUY_INLINE_KEYBOARD)
+        set_lang(u.language)
+        ok = await notify_user_telegram(u.telegram_id, t("notify.sub_expired"), reply_markup=buy_inline_keyboard())
         if ok:
             u.notify_sub_expired_sent = True
             await session.commit()
@@ -117,7 +115,8 @@ async def run_subscription_notifications(session: AsyncSession) -> None:
             continue
         if not _in_3d_warning_window(end):
             continue
-        ok = await notify_user_telegram(u.telegram_id, MSG_SUB_3D, reply_markup=BUY_INLINE_KEYBOARD)
+        set_lang(u.language)
+        ok = await notify_user_telegram(u.telegram_id, t("notify.sub_3d_warning"), reply_markup=buy_inline_keyboard())
         if ok:
             u.notify_sub_3d_before_sent = True
             await session.commit()

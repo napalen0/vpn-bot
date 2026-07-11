@@ -30,6 +30,7 @@ class BackendClient:
         username: str | None,
         first_name: str | None,
         referrer_telegram_id: int | None = None,
+        language: str | None = None,
     ) -> dict[str, Any]:
         r = await self._client.post(
             "/user/create",
@@ -38,6 +39,7 @@ class BackendClient:
                 "username": username,
                 "first_name": first_name,
                 "referrer_telegram_id": referrer_telegram_id,
+                "language": language,
             },
         )
         r.raise_for_status()
@@ -83,3 +85,11 @@ class BackendClient:
 
     def get_sub_url(self, base_url: str, sub_token: str) -> str:
         return f"{base_url.rstrip('/')}/vpn/sub/{sub_token}"
+
+    async def set_language(self, telegram_id: int, language: str) -> dict[str, Any]:
+        r = await self._client.post(
+            "/user/set_language",
+            json={"telegram_id": telegram_id, "language": language},
+        )
+        r.raise_for_status()
+        return r.json()

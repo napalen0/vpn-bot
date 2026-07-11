@@ -19,6 +19,7 @@ from bot.client import BackendClient
 from bot.config import BOT_TOKEN
 from bot.handlers.menu import router as menu_router
 from bot.middlewares.channel_gate import ChannelSubscriptionMiddleware
+from bot.middlewares.locale import LocaleMiddleware
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
 log = logging.getLogger(__name__)
@@ -43,6 +44,7 @@ async def main() -> None:
     dp.include_router(menu_router)
 
     client = BackendClient()
+    dp.update.middleware(LocaleMiddleware())
     dp.update.middleware(ChannelSubscriptionMiddleware())
     dp.update.middleware(ClientMiddleware(client))
 

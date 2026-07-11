@@ -10,6 +10,7 @@ class UserCreateIn(BaseModel):
     username: str | None = None
     first_name: str | None = None
     referrer_telegram_id: int | None = None
+    language: str | None = None
 
 
 class UserOut(BaseModel):
@@ -23,6 +24,7 @@ class UserOut(BaseModel):
     referrer_id: int | None
     trial_used: bool
     sub_token: str | None = None
+    language: str = "ru"
 
 
 class VpnTrialIn(BaseModel):

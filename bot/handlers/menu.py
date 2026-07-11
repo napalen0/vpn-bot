@@ -24,13 +24,14 @@ from bot.keyboards import (
     back_main,
     channel_gate_kb,
     channel_page_kb,
+    language_selector_kb,
     main_menu,
     pay_url,
     profile_kb,
     profile_kb_expanded,
     tariffs,
 )
-from bot.locale import t
+from bot.locale import set_lang, t
 from bot.utils.channel import user_subscribed_to_channel
 from bot.utils.subscription import (
     escape_pre_block,
@@ -134,16 +135,29 @@ async def cmd_start(message: Message, state: FSMContext, client: BackendClient):
         if m:
             ref_tid = int(m.group(1))
 
+    tg_lang = (message.from_user.language_code or "")[:2].lower()
+    initial_lang = tg_lang if tg_lang in ("ru", "en") else "ru"
+
     try:
-        await client.user_create(
+        user_data = await client.user_create(
             telegram_id=message.from_user.id,
             username=message.from_user.username,
             first_name=message.from_user.first_name,
             referrer_telegram_id=ref_tid,
+            language=initial_lang,
         )
     except Exception as e:
         log.exception("user_create")
         await message.answer(t("error.service", detail=e))
+        return
+
+    saved_lang = user_data.get("language", "ru")
+    set_lang(saved_lang)
+    await state.update_data(lang=saved_lang)
+
+    fsm_data = await state.get_data()
+    if not fsm_data.get("lang_chosen"):
+        await render(message, state, t("lang.choose"), language_selector_kb())
         return
 
     if REQUIRE_CHANNEL_SUBSCRIPTION and REQUIRED_CHANNEL_USERNAME:
@@ -164,6 +178,43 @@ async def cmd_start(message: Message, state: FSMContext, client: BackendClient):
         message,
         state,
         _main_text(message.from_user.first_name),
+        await _main_menu_markup(client, u),
+        photo=main_menu_image_path(),
+    )
+
+
+@router.callback_query(F.data.startswith("lang_"))
+async def cb_language(call: CallbackQuery, state: FSMContext, client: BackendClient):
+    lang = call.data.split("_", 1)[1]
+    if lang not in ("ru", "en"):
+        lang = "ru"
+
+    set_lang(lang)
+    await state.update_data(lang=lang, lang_chosen=True)
+
+    try:
+        await client.set_language(call.from_user.id, lang)
+    except Exception:
+        log.exception("set_language")
+
+    if REQUIRE_CHANNEL_SUBSCRIPTION and REQUIRED_CHANNEL_USERNAME:
+        if not await user_subscribed_to_channel(
+            call.bot, call.from_user.id, REQUIRED_CHANNEL_USERNAME
+        ):
+            await render(call, state, t("gate.subscribe_prompt"), channel_gate_kb())
+            return
+
+    try:
+        u = await client.user_by_telegram(call.from_user.id)
+    except Exception as e:
+        log.exception("user_by_telegram")
+        await call.answer(t("error.load", detail=e))
+        return
+
+    await render(
+        call,
+        state,
+        _main_text(call.from_user.first_name),
         await _main_menu_markup(client, u),
         photo=main_menu_image_path(),
     )

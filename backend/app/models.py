@@ -47,6 +47,7 @@ class User(Base):
     notify_sub_expired_sent: Mapped[bool] = mapped_column(Boolean, default=False)
     notify_sub_3d_before_sent: Mapped[bool] = mapped_column(Boolean, default=False)
     sub_token: Mapped[str | None] = mapped_column(String(64), unique=True, index=True, nullable=True)
+    language: Mapped[str] = mapped_column(String(8), default="ru", server_default="ru")
 
     referrer: Mapped[User | None] = relationship(
         "User", remote_side=[id], foreign_keys=[referrer_id], backref="referrals_list"

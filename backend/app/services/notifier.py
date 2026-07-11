@@ -14,9 +14,9 @@ from bot.locale import t  # noqa: E402
 
 log = logging.getLogger(__name__)
 
-BUY_INLINE_KEYBOARD = {
-    "inline_keyboard": [[{"text": t("btn.choose_plan"), "callback_data": "buy"}]]
-}
+
+def buy_inline_keyboard() -> dict:
+    return {"inline_keyboard": [[{"text": t("btn.choose_plan"), "callback_data": "buy"}]]}
 
 
 async def notify_user_telegram(

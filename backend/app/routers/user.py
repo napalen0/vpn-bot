@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -8,6 +9,10 @@ from app.database import get_db
 from app.deps import require_api_key
 from app.models import User
 from app.schemas import UserCreateIn, UserOut
+
+class SetLanguageIn(BaseModel):
+    telegram_id: int
+    language: str
 from app.services.notifier import notify_admins
 from app.services.referral_service import apply_referral_by_telegram
 from app.services.vpn_core import refresh_user_status
@@ -37,6 +42,7 @@ async def user_create(body: UserCreateIn, session: AsyncSession = Depends(get_db
         telegram_id=body.telegram_id,
         username=body.username,
         first_name=body.first_name,
+        language=body.language or "ru",
         sub_token=str(uuid_lib.uuid4()),
     )
     session.add(u)
@@ -68,4 +74,15 @@ async def user_get(user_id: int, session: AsyncSession = Depends(get_db)) -> Use
     if not u:
         raise HTTPException(404, "User not found")
     await refresh_user_status(session, u)
+    return UserOut.model_validate(u)
+
+
+@router.post("/set_language", dependencies=[Depends(require_api_key)])
+async def set_language(body: SetLanguageIn, session: AsyncSession = Depends(get_db)) -> UserOut:
+    u = await session.scalar(select(User).where(User.telegram_id == body.telegram_id))
+    if not u:
+        raise HTTPException(404, "User not found")
+    u.language = body.language
+    await session.commit()
+    await session.refresh(u)
     return UserOut.model_validate(u)

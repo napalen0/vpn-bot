@@ -78,3 +78,12 @@ def pay_url(url: str) -> InlineKeyboardMarkup:
     kb.row(InlineKeyboardButton(text=t("btn.pay_crypto"), url=url))
     kb.row(InlineKeyboardButton(text=t("btn.back_menu"), callback_data="main"))
     return kb.as_markup()
+
+
+def language_selector_kb() -> InlineKeyboardMarkup:
+    kb = InlineKeyboardBuilder()
+    kb.row(
+        InlineKeyboardButton(text="🇷🇺 Русский", callback_data="lang_ru"),
+        InlineKeyboardButton(text="🇬🇧 English", callback_data="lang_en"),
+    )
+    return kb.as_markup()
