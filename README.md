@@ -1,31 +1,49 @@
-# VPN Bot — Telegram VPN Service on VLESS + Reality
+<p align="center">
+  <img src="menu_banner.png" alt="VPN Bot" width="360"/>
+</p>
 
-A complete, self-hosted VPN service managed through a Telegram bot. Users get one-tap access to a fast, censorship-resistant VPN — no apps to install beyond their favorite V2Ray client.
+<h1 align="center">VPN Bot</h1>
 
-## Why This Project
+<p align="center">
+  Self-hosted Telegram VPN service on VLESS + Reality<br/>
+  <sub>Multi-server &bull; Split-tunnel &bull; One-tap connect &bull; Crypto payments</sub>
+</p>
 
-| Problem | How VPN Bot solves it |
-|---|---|
-| VPN protocols get blocked by DPI | **VLESS + Reality** looks like regular HTTPS to any deep packet inspector |
-| Single transport gets throttled | **Dual transport** — TCP and gRPC on every server; client auto-picks the one that works |
-| Russian apps detect VPN and show popups | **Split-tunnel routing** — traffic to Russian sites goes direct, not through the tunnel |
-| "White list" mode blocks everything | gRPC transport + Reality camouflage bypass even the strictest filters |
-| Managing configs is painful | **Subscription URL** — one link, paste into V2Ray/Hiddify/Happ, always up to date |
-| Adding servers is complicated | **One-click provisioning** — enter SSH credentials in admin panel, Xray installs automatically |
+<p align="center">
+  <a href="#quick-start">Quick Start</a> &bull;
+  <a href="#features">Features</a> &bull;
+  <a href="#architecture">Architecture</a> &bull;
+  <a href="#deploy-scripts">Deploy</a> &bull;
+  <a href="#donate">Donate</a>
+</p>
+
+---
+
+## Why
+
+VPN protocols get blocked. Configs break. Users can't set things up. This project solves all three:
+
+- **VLESS + Reality** — looks like regular HTTPS to any DPI, passes through even the strictest filters
+- **Dual transport** (TCP + gRPC) — if one gets throttled, the other works
+- **Split-tunnel** — Russian sites go direct, no "turn off your VPN" popups from banks
+- **Subscription URL** — one link, paste into any V2Ray client, always up to date
+- **One-click server provisioning** — enter SSH creds in admin panel, Xray installs itself
 
 ## Features
 
-- **Telegram Bot** (aiogram 3) — single-message UI, trial activation, subscription purchase, config delivery
-- **Subscription Links** — standard base64 V2Ray subscription format, auto-updates when you add servers
-- **VLESS + Reality** — undetectable protocol with TCP and gRPC transports
-- **Split-Tunnel** — Russian IPs and domains bypass the VPN (geoip/geosite rules on server)
-- **Multi-Server Pool** — paid users get all servers, trial users get one
-- **Admin Panel** — web dashboard for users, servers, keys, payments, settings
-- **Auto-Provisioning** — add a server by IP + SSH credentials, Xray installs and configures itself
-- **CryptoPay Payments** — accept crypto via [@CryptoBot](https://t.me/CryptoBot)
-- **Referral System** — invite friends, earn bonus days
-- **Server Health Monitor** — background checks with Telegram alerts to admins
-- **Subscription Notifications** — reminds users before expiry via Telegram
+| | |
+|---|---|
+| **Telegram Bot** | Single-message UI, trial activation, subscription purchase, config delivery (aiogram 3) |
+| **Subscription Links** | Standard base64 V2Ray format — works with Hiddify, V2RayNG, Happ, Streisand |
+| **VLESS + Reality** | Undetectable protocol with TCP and gRPC transports per server |
+| **Split-Tunnel** | `geoip:ru` + `geosite:category-ru` routing rules on server side |
+| **Multi-Server** | Paid users get all servers, trial — one. Add servers in 30 seconds |
+| **Admin Panel** | Users, keys, servers, payments, referrals, settings — all in browser |
+| **Auto-Provisioning** | IP + SSH password → fully configured Xray node with Reality |
+| **Crypto Payments** | USDT via [@CryptoBot](https://t.me/CryptoBot) — 7 / 30 / 90 day plans |
+| **Referrals** | Invite link + bonus days when a friend buys a plan |
+| **Health Monitor** | Background server checks, Telegram alerts to admins on failure |
+| **Expiry Alerts** | 3-day warning + post-expiry notification to users via Telegram |
 
 ## Architecture
 
@@ -36,12 +54,12 @@ Telegram User
 ┌──────────┐     HTTP      ┌──────────────────┐     SSH      ┌──────────────┐
 │  TG Bot  │ ◄──────────► │  FastAPI Backend  │ ◄──────────► │  Xray Server │
 │ aiogram 3│               │  + Admin Panel    │              │  VLESS+Reality│
-└──────────┘               │  + SQLite/Postgres│              │  TCP + gRPC  │
+└──────────┘               │  + SQLite         │              │  TCP + gRPC  │
                            └──────────────────┘              └──────────────┘
                                     │
                            ┌────────┴────────┐
                            │  /vpn/sub/{token}│  ← Subscription URL
-                           │  (public, no key)│    for V2Ray clients
+                           │  (public)        │    for V2Ray clients
                            └─────────────────┘
 ```
 
@@ -50,7 +68,7 @@ Telegram User
 ### 1. Clone and configure
 
 ```bash
-git clone https://github.com/yourname/vpn-bot.git
+git clone https://github.com/napalen0/vpn-bot.git
 cd vpn-bot
 cp .env.example .env
 # Edit .env — set BOT_TOKEN, API_SECRET, SESSION_SECRET, PUBLIC_BASE_URL
@@ -63,66 +81,54 @@ python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### 3. Start the backend
+### 3. Start
 
 ```bash
+# Backend (from vpn-bot/backend/)
 cd backend
 python3 -m uvicorn app.main:app --host 127.0.0.1 --port 8080
+
+# Bot (from vpn-bot/, separate terminal)
+python3 -m bot.main
 ```
 
 Admin panel: `http://127.0.0.1:8080/admin`
 
-### 4. Start the bot
+### 4. Add a VPN server
 
-```bash
-# From the project root (vpn-bot/), not backend/
-python3 -m bot.main
-```
+**Auto-provision (recommended):**
 
-### 5. Add a VPN server
+1. Get any VPS with Ubuntu 22.04+
+2. Admin panel → Servers → "Auto: SSH + Install Xray"
+3. Enter IP, SSH port, login, password
+4. Done — Xray with VLESS+Reality is live in ~30 seconds
 
-**Option A — Auto-provision (recommended):**
-
-1. Get a VPS (Ubuntu 22.04+, any provider)
-2. In admin panel → Servers → "Auto: SSH + Install Xray"
-3. Enter IP, SSH port, login, password → Done
-
-The backend SSHs into the VPS, installs Xray with VLESS+Reality (TCP + gRPC), sets up split-tunnel routing, and registers the server in the database. Takes ~30 seconds.
-
-**Option B — Manual:**
+**Manual:**
 
 1. Run `deploy/install_xray_vpnbot.sh` on your VPS
 2. Copy the `VPNBOT_JSON` output
-3. Add server manually in admin panel with the public key and short ID
+3. Add server in admin panel with the public key and short ID
 
-### 6. Set up subscription URL (optional but recommended)
+### 5. Subscription URL (recommended)
 
-Point a domain to your backend with nginx:
+Point a domain to backend with nginx:
 
 ```nginx
-server {
-    listen 443 ssl http2;
-    server_name vpn.example.com;
-
-    # SSL certs...
-
-    location /vpn/sub/ {
-        proxy_pass http://127.0.0.1:8080;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-    }
+location /vpn/sub/ {
+    proxy_pass http://127.0.0.1:8080;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
 }
 ```
 
-Set `PUBLIC_BASE_URL=https://vpn.example.com` in `.env`. Users get a link like:
-```
-https://vpn.example.com/vpn/sub/a1b2c3d4-...
-```
-Paste it into V2Ray/Hiddify/Happ as a subscription — configs update automatically.
+Set `PUBLIC_BASE_URL=https://vpn.example.com` in `.env`.
 
-## Server Naming in Clients
+Users paste one link into their V2Ray app — configs update automatically when you add/remove servers.
 
-Servers appear in V2Ray/Hiddify with clean names:
+## Server Display
+
+Servers appear with clean names in V2Ray clients:
+
 ```
 🇫🇮 Helsinki
 🇫🇮 Helsinki gRPC
@@ -130,105 +136,101 @@ Servers appear in V2Ray/Hiddify with clean names:
 🇳🇱 Amsterdam gRPC
 ```
 
-Set the `name` and `country` (ISO 3166-1 alpha-2) in the admin panel for each server.
+Set `name` and `country` (ISO 3166-1 alpha-2) per server in admin panel.
 
-## API Endpoints
+## API
 
 All endpoints require `X-API-Key` header except subscription URLs.
 
 | Method | Path | Description |
 |--------|------|-------------|
-| POST | `/user/create` | Register user |
-| GET | `/user/telegram/{id}` | Get user by Telegram ID |
-| POST | `/vpn/create_trial` | Activate free trial |
-| POST | `/vpn/create_paid` | Create paid subscription |
-| POST | `/vpn/vless_export` | Get VLESS configs |
-| GET | `/vpn/sub/{token}` | Subscription URL (public) |
-| POST | `/vpn/sync_pool` | Sync keys across servers |
-| GET | `/catalog` | List available plans |
-| POST | `/payment/create_invoice` | Create CryptoPay invoice |
-| POST | `/payment/webhook` | CryptoPay callback |
+| `POST` | `/user/create` | Register user |
+| `GET` | `/user/telegram/{id}` | Get user by Telegram ID |
+| `POST` | `/vpn/create_trial` | Activate free trial |
+| `POST` | `/vpn/create_paid` | Create paid subscription |
+| `POST` | `/vpn/vless_export` | Get VLESS configs |
+| `GET` | `/vpn/sub/{token}` | Subscription URL (public) |
+| `POST` | `/vpn/sync_pool` | Sync keys across servers |
+| `GET` | `/catalog` | List available plans |
+| `POST` | `/payment/create_invoice` | Create CryptoPay invoice |
+| `POST` | `/payment/webhook` | CryptoPay callback |
 
 ## Deploy Scripts
 
-| Script | Purpose |
-|--------|---------|
-| `install_xray_vpnbot.sh` | Install Xray + VLESS Reality (TCP+gRPC) + split-tunnel |
-| `remote_add_vless_client.sh` | Add UUID to all Xray inbounds |
-| `remote_bulk_add_vless_clients.sh` | Bulk-add UUIDs after Xray reinstall |
-| `remote_remove_vless_client.sh` | Remove UUID on subscription expiry |
+| Script | What it does |
+|--------|-------------|
+| `install_xray_vpnbot.sh` | Full Xray + VLESS Reality + split-tunnel setup |
+| `remote_add_vless_client.sh` | Add UUID to all inbounds |
+| `remote_bulk_add_vless_clients.sh` | Bulk-add UUIDs after reinstall |
+| `remote_remove_vless_client.sh` | Remove UUID on expiry |
 | `remote_set_reality_dest.sh` | Change Reality masquerade target |
-| `remote_apply_inbound_port.sh` | Change Xray listening port |
+| `remote_apply_inbound_port.sh` | Change listening port |
 | `remote_remove_xray_vpnbot.sh` | Uninstall Xray from server |
 
-## Split-Tunnel Details
+## Split-Tunnel
 
-The Xray server config includes routing rules that send Russian traffic direct:
+Xray routing rules send Russian traffic direct (not through VPN):
 
 - `geosite:category-ru` — Russian websites
 - `geosite:category-gov-ru` — Government services
 - `geoip:ru` — Russian IP ranges
 
-This means Russian apps (banks, government services, delivery apps) work normally without VPN popups asking to disable it.
+Banks, government portals, delivery apps — all work without disabling VPN.
 
-Geo-data is downloaded from [Loyalsoldier/v2ray-rules-dat](https://github.com/Loyalsoldier/v2ray-rules-dat) during server provisioning.
-
-## Security Notes
-
-- Change all default secrets in `.env` before deploying
-- Never commit `.env` (it's in `.gitignore`)
-- SSH passwords for servers are encrypted with Fernet (tied to `SESSION_SECRET`)
-- Use HTTPS in production for the subscription endpoint
-- Consider PostgreSQL instead of SQLite for production loads
+Geo-data: [Loyalsoldier/v2ray-rules-dat](https://github.com/Loyalsoldier/v2ray-rules-dat).
 
 ## Project Structure
 
 ```
 vpn-bot/
-├── backend/
-│   └── app/
-│       ├── main.py              # FastAPI app + startup
-│       ├── models.py            # SQLAlchemy models
-│       ├── database.py          # DB engine + auto-migrations
-│       ├── config.py            # Settings from .env
-│       ├── admin_routes.py      # Admin panel (Jinja2)
-│       ├── routers/             # API endpoints
-│       │   ├── vpn.py           # VPN keys + subscription URL
-│       │   ├── user.py          # User management
-│       │   ├── payment.py       # CryptoPay integration
-│       │   ├── catalog.py       # Plan catalog
-│       │   └── ref.py           # Referral system
-│       ├── services/            # Business logic
-│       │   ├── vpn_core.py      # VLESS URI builder, pool management
-│       │   ├── vless_bundle.py  # Subscription export (base64)
-│       │   ├── xray_ssh.py      # SSH operations on Xray servers
-│       │   ├── cryptobot.py     # CryptoPay API client
-│       │   └── ...
-│       └── templates/admin/     # Admin panel HTML
+├── backend/app/
+│   ├── main.py              # FastAPI + startup tasks
+│   ├── models.py            # SQLAlchemy models
+│   ├── database.py          # DB engine + auto-migrations
+│   ├── admin_routes.py      # Admin panel (Jinja2)
+│   ├── routers/             # API endpoints
+│   │   ├── vpn.py           # VPN keys + subscription
+│   │   ├── payment.py       # CryptoPay integration
+│   │   └── ...
+│   ├── services/            # Business logic
+│   │   ├── vpn_core.py      # VLESS URI builder, pool mgmt
+│   │   ├── xray_ssh.py      # SSH operations on Xray nodes
+│   │   ├── vless_bundle.py  # Subscription export (base64)
+│   │   └── ...
+│   └── templates/admin/     # Admin panel HTML
 ├── bot/
-│   ├── main.py                  # Bot entry point
-│   ├── client.py                # Backend HTTP client
-│   ├── config.py                # Bot settings
-│   ├── keyboards.py             # Inline keyboards
-│   ├── handlers/menu.py         # All bot handlers
-│   ├── middlewares/              # Channel subscription gate
-│   └── utils/                   # UI helpers
-├── deploy/                      # Server provisioning scripts
-├── .env.example                 # Configuration template
-└── requirements.txt             # Python dependencies
+│   ├── main.py              # Bot entry point
+│   ├── locale.py            # i18n strings (RU)
+│   ├── handlers/menu.py     # All bot handlers
+│   ├── keyboards.py         # Inline keyboards
+│   └── middlewares/         # Channel gate
+├── deploy/                  # Server provisioning scripts
+├── .env.example             # Configuration template
+└── requirements.txt
 ```
 
 ## Tech Stack
 
-- **Python 3.11+**
-- **FastAPI** — async backend + admin panel
-- **aiogram 3** — Telegram bot framework
-- **SQLAlchemy 2** (async) — ORM with auto-migrations
-- **SQLite** (dev) / **PostgreSQL** (prod)
-- **Xray-core** — VLESS + Reality protocol
-- **asyncssh** — remote server management
-- **CryptoPay** — cryptocurrency payments
+**Python 3.11+** &bull; FastAPI &bull; aiogram 3 &bull; SQLAlchemy 2 (async) &bull; SQLite &bull; Xray-core &bull; asyncssh &bull; CryptoPay API
+
+## Security
+
+- Change all secrets in `.env` before deploying
+- SSH passwords encrypted with Fernet (tied to `SESSION_SECRET`)
+- Use HTTPS for the subscription endpoint in production
+- `.env` and `*.db` are in `.gitignore`
+
+---
+
+## Donate
+
+If this project was useful to you — you can support its development:
+
+**Bitcoin (BTC):**
+```
+bc1qxt2jyf7w7wmf8y96875y9yk5sas5gqss4um48j
+```
 
 ## License
 
-MIT
+[MIT](LICENSE) — use it, fork it, build your own VPN service. Free and open source.
