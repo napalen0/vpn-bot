@@ -185,7 +185,9 @@ async def cmd_start(message: Message, state: FSMContext, client: BackendClient):
 
 @router.callback_query(F.data.startswith("lang_"))
 async def cb_language(call: CallbackQuery, state: FSMContext, client: BackendClient):
-    lang = call.data.split("_", 1)[1]
+    parts = call.data.split("_")
+    lang = parts[1] if len(parts) >= 2 else "ru"
+    source = parts[2] if len(parts) >= 3 else "start"
     if lang not in ("ru", "en"):
         lang = "ru"
 
@@ -196,6 +198,23 @@ async def cb_language(call: CallbackQuery, state: FSMContext, client: BackendCli
         await client.set_language(call.from_user.id, lang)
     except Exception:
         log.exception("set_language")
+
+    if source == "profile":
+        try:
+            user = await client.user_by_telegram(call.from_user.id)
+            if not show_profile_button(user):
+                await render(
+                    call, state,
+                    t("profile.no_access"),
+                    await _main_menu_markup(client, user),
+                    photo=main_menu_image_path(),
+                )
+                return
+            await render(call, state, _profile_text(user), profile_kb())
+        except Exception as e:
+            log.exception("lang→profile")
+            await render(call, state, t("error.generic", detail=e), back_main())
+        return
 
     if REQUIRE_CHANNEL_SUBSCRIPTION and REQUIRED_CHANNEL_USERNAME:
         if not await user_subscribed_to_channel(
@@ -393,7 +412,12 @@ async def cb_profile(call: CallbackQuery, state: FSMContext, client: BackendClie
         await render(call, state, t("error.generic", detail=e), back_main())
 
 
-@router.callback_query(F.data == "profile_config")
+@router.callback_query(F.data == "profile_lang")
+async def cb_profile_lang(call: CallbackQuery, state: FSMContext):
+    await call.answer()
+    fsm = await state.get_data()
+    current = fsm.get("lang", "ru")
+    await render(call, state, t("lang.choose"), language_selector_kb(current, source="profile"))@router.callback_query(F.data == "profile_config")
 async def cb_profile_config(call: CallbackQuery, state: FSMContext, client: BackendClient):
     await call.answer()
     tg = call.from_user.id

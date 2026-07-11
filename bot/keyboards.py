@@ -50,6 +50,7 @@ def back_main() -> InlineKeyboardMarkup:
 def profile_kb() -> InlineKeyboardMarkup:
     kb = InlineKeyboardBuilder()
     kb.row(InlineKeyboardButton(text=t("btn.config"), callback_data="profile_config"))
+    kb.row(InlineKeyboardButton(text=t("btn.language"), callback_data="profile_lang"))
     kb.row(InlineKeyboardButton(text=t("btn.back_menu"), callback_data="main"))
     return kb.as_markup()
 
@@ -80,10 +81,14 @@ def pay_url(url: str) -> InlineKeyboardMarkup:
     return kb.as_markup()
 
 
-def language_selector_kb() -> InlineKeyboardMarkup:
+def language_selector_kb(current: str = "", source: str = "start") -> InlineKeyboardMarkup:
     kb = InlineKeyboardBuilder()
+    ru_label = "✅ RU" if current == "ru" else "🇷🇺 RU"
+    en_label = "✅ EN" if current == "en" else "🇬🇧 EN"
     kb.row(
-        InlineKeyboardButton(text="🇷🇺 Русский", callback_data="lang_ru"),
-        InlineKeyboardButton(text="🇬🇧 English", callback_data="lang_en"),
+        InlineKeyboardButton(text=ru_label, callback_data=f"lang_ru_{source}"),
+        InlineKeyboardButton(text=en_label, callback_data=f"lang_en_{source}"),
     )
+    if source == "profile":
+        kb.row(InlineKeyboardButton(text=t("btn.back"), callback_data="profile"))
     return kb.as_markup()
